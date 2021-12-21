@@ -1,0 +1,36 @@
+version: '3.5'
+services:
+  database:
+    container_name: percona-db
+    image: percona/percona-server:8.0
+    restart: always
+    privileged: true
+    volumes:
+      - db_data:/var/lib/mysql
+    port: "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_db_root
+    secrets:
+      - db_root_password
+
+  loadbalancer:
+    container_name: loadbalancer
+    image: nginx
+    restart: always
+    volumes:
+      - "./*.conf:/etc/nginx/conf.d/"
+    port: "80:80"
+     
+  webserver:
+    container_name: app-server
+    image: nginx 
+    restart: always
+    working_dir: /var/www/html
+    port: "8081:80"
+    volumes:
+      - "./index.html:/var/www/html/index.html"
+
+db_root_password:
+     file: db_root_password.txt
+volumes:
+    db_data:
